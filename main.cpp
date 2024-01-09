@@ -16,7 +16,8 @@ void EventLoop(Shader shader) {
 
     // add uniforms to shader
     float screenSize[2] = { (float)w, (float)h };
-    SetShaderValue(shader, GetShaderLocation(shader, "t"), &elapsed, SHADER_UNIFORM_FLOAT);
+    float t = (float)elapsed;
+    SetShaderValue(shader, GetShaderLocation(shader, "t"), &t, SHADER_UNIFORM_FLOAT);
     SetShaderValue(shader, GetShaderLocation(shader, "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
     // draw background
     BeginShaderMode(shader);
@@ -24,7 +25,7 @@ void EventLoop(Shader shader) {
     EndShaderMode();
 
     // printf("Debug - %i %f\n", fps, elapsed);
-    DrawText(TextFormat("%i %f", fps, elapsed), 10, 10, 20, WHITE);
+    DrawText(TextFormat("%i %f", fps, elapsed), 10, 10, 18, WHITE);
     DrawPoly((Vector2){ (float)w/2, (float)h/2 }, 4, 80, elapsed * 10, WHITE);
 
   } else {
