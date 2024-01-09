@@ -1,0 +1,6 @@
+# ignore build artifacts
+*.exe
+*.pdb
+
+# ignore temp items
+temp*
