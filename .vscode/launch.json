@@ -16,6 +16,22 @@
         "miDebuggerPath": "C:/raylib/w64devkit/bin/gdb.exe",
       },
       "preLaunchTask": "build debug"
+    },
+    {
+      "name": "Release",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/${fileBasenameNoExtension}",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "windows": {
+        "miDebuggerPath": "C:/raylib/w64devkit/bin/gdb.exe",
+      },
+      "preLaunchTask": "build release"
     }
   ]
 }
