@@ -4,15 +4,68 @@
 
 #define GLSL_VERSION 330
 
+enum Scene {
+  menu,
+  game
+};
+
 class EventLoop {
   public:
     Shader bgShader;
     Font font;
     Color primaryColor;
-    void main(); // main event loop
+    Scene scene;
+    void root(); // main event loop
+    void menu();
+    void game();
 };
 
-void EventLoop::main() {
+void EventLoop::root() {
+  switch(scene) {
+    case Scene::game:
+      game();
+      break;
+    case Scene::menu:
+    default:
+      menu();
+      break;
+  }
+}
+
+void EventLoop::menu() {
+  // --- UPDATE STATE ---
+  int w = GetScreenWidth();
+  int h = GetScreenHeight();
+  int fps = GetFPS();
+  double elapsed = GetTime();
+  // Vector2 mousePos = GetMousePosition();
+  // Vector2 screenCenter = { (float)w/2, (float)h/2 };
+
+  // add uniforms to background shader
+  float screenSize[2] = { (float)w, (float)h };
+  float t = (float)elapsed;
+  SetShaderValue(bgShader, GetShaderLocation(bgShader, "t"), &t, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(bgShader, GetShaderLocation(bgShader, "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
+
+  // --- DRAW TO SCREEN ---
+  BeginDrawing();
+    ClearBackground(BLACK);
+    // draw background
+    BeginShaderMode(bgShader);
+      DrawRectangle(0, 0, w, h, WHITE);
+    EndShaderMode();
+
+    // draw text overlay
+    DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
+    DrawTextEx(font, TextFormat("Duration: %f", elapsed), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
+    DrawTextEx(font, "Hit space to enter game", (Vector2){ (float)w/2 - 170, (float)h/2 - 10 }, 20, 3.5, WHITE);
+  EndDrawing();
+
+  // --- REGISTER INPUT ---
+  if (IsKeyPressed(KEY_SPACE)) scene = Scene::game;
+}
+
+void EventLoop::game() {
   // --- UPDATE STATE ---
   // get world parameters
   int w = GetScreenWidth();
@@ -83,11 +136,12 @@ int main() {
   eventLoop.bgShader = shader;
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
+  eventLoop.scene = Scene::menu;
   
   // --- EVENT LOOP ---
   printf("\n\n\n-- Starting Event Loop --\n");
   while (!WindowShouldClose()) {
-    eventLoop.main();
+    eventLoop.root();
   }
 
   // --- CLEAN UP ---
