@@ -8,6 +8,7 @@ class EventLoop {
   public:
     Shader bgShader;
     Font font;
+    Color primaryColor;
     void main(); // main event loop
 };
 
@@ -45,9 +46,9 @@ void EventLoop::main() {
       EndShaderMode();
       
       // draw rotating hex
-      DrawPoly(screenCenter, 6, 50, elapsed * 10, WHITE);
+      DrawPoly(screenCenter, 6, 50, elapsed * 10, primaryColor);
       // draw triangle
-      DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, GREEN);
+      DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
       // debug line
       // DrawLine(w/2, h/2, (int)mousePos.x, (int)mousePos.y, GREEN);
 
@@ -75,11 +76,13 @@ int main() {
   SetTextLineSpacing(48);
 
   Shader shader = LoadShader(0, TextFormat("assets/test.frag", GLSL_VERSION));
+  Color primary = GetColor(0xafaaecff);
 
   // add assets to event loop
   EventLoop eventLoop;
   eventLoop.bgShader = shader;
   eventLoop.font = fontRetro;
+  eventLoop.primaryColor = primary;
   
   // --- EVENT LOOP ---
   printf("\n\n\n-- Starting Event Loop --\n");
