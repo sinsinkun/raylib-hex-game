@@ -14,8 +14,9 @@ class EventLoop {
   public:
     Shader bgShader;
     Font font;
-    Color primaryColor;
+    Color primaryColor = WHITE;
     Scene scene;
+    float lifetime = 0;
     void root(); // main event loop
     void menu();
     void game();
@@ -58,12 +59,15 @@ void EventLoop::menu() {
 
     // draw text overlay
     DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
-    DrawTextEx(font, TextFormat("Duration: %f", elapsed), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
+    DrawTextEx(font, TextFormat("Duration: %f", lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
     DrawTextEx(font, "Hit space to enter game", (Vector2){ (float)w/2 - 170, (float)h/2 - 10 }, 20, 3.5, WHITE);
   EndDrawing();
 
   // --- REGISTER INPUT ---
-  if (IsKeyPressed(KEY_SPACE)) scene = Scene::game;
+  if (IsKeyPressed(KEY_SPACE)) {
+    scene = Scene::game;
+    lifetime = 0;
+  }
 }
 
 void EventLoop::game() {
@@ -72,7 +76,7 @@ void EventLoop::game() {
   int w = GetScreenWidth();
   int h = GetScreenHeight();
   int fps = GetFPS();
-  double elapsed = GetTime();
+  lifetime += GetFrameTime();
   Vector2 mousePos = GetMousePosition();
   Vector2 screenCenter = { (float)w/2, (float)h/2 };
 
@@ -86,8 +90,7 @@ void EventLoop::game() {
 
   // add uniforms to background shader
   float screenSize[2] = { (float)w, (float)h };
-  float t = (float)elapsed;
-  SetShaderValue(bgShader, GetShaderLocation(bgShader, "t"), &t, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(bgShader, GetShaderLocation(bgShader, "t"), &lifetime, SHADER_UNIFORM_FLOAT);
   SetShaderValue(bgShader, GetShaderLocation(bgShader, "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
 
   // --- DRAW TO SCREEN ---
@@ -100,21 +103,26 @@ void EventLoop::game() {
       EndShaderMode();
       
       // draw rotating hex
-      DrawPoly(screenCenter, 6, 50, elapsed * 10, primaryColor);
+      DrawPoly(screenCenter, 6, 50, lifetime * 10, primaryColor);
       // draw triangle
       DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
       // debug line
       // DrawLine(w/2, h/2, (int)mousePos.x, (int)mousePos.y, GREEN);
-      WallShape::DrawWall(screenCenter, 80, 25, elapsed * 10, RED);
+      WallShape::DrawWall(screenCenter, 80, 25, lifetime * 10, RED);
 
       // draw text overlay
       DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
-      DrawTextEx(font, TextFormat("Duration: %f", elapsed), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
+      DrawTextEx(font, TextFormat("Duration: %f", lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
 
     } else {
       DrawText("Pay attention to me", 10, 10, 24, RED);
     }
   EndDrawing();
+
+  // --- REGISTER INPUT ---
+  if (IsKeyPressed(KEY_SPACE)) {
+    scene = Scene::menu;
+  }
 }
 
 int main() {
