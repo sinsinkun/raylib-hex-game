@@ -59,7 +59,10 @@ void EventLoop::menu() {
 
     // draw text overlay
     DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
-    DrawTextEx(font, TextFormat("Duration: %f", lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
+    int num1 = lifetime * 100;
+    int num2 = lifetime;
+    int num3 = num1 % 100;
+    DrawTextEx(font, TextFormat("Duration: %i.%i", num2, num3), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
     DrawTextEx(font, "Hit space to enter game", (Vector2){ (float)w/2 - 170, (float)h/2 - 10 }, 20, 3.5, WHITE);
   EndDrawing();
 
@@ -112,7 +115,10 @@ void EventLoop::game() {
 
       // draw text overlay
       DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
-      DrawTextEx(font, TextFormat("Duration: %f", lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
+      int num1 = lifetime * 100;
+      int num2 = lifetime;
+      int num3 = num1 % 100;
+      DrawTextEx(font, TextFormat("Duration: %i.%i", num2, num3), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
 
     } else {
       DrawText("Pay attention to me", 10, 10, 24, RED);
