@@ -1,6 +1,7 @@
 #include <cstdio> // imports printf
 #include "raylib.h"
 #include "raymath.h"
+#include "wallShape.h"
 
 #define GLSL_VERSION 330
 
@@ -104,6 +105,7 @@ void EventLoop::game() {
       DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
       // debug line
       // DrawLine(w/2, h/2, (int)mousePos.x, (int)mousePos.y, GREEN);
+      WallShape::DrawWall(screenCenter, 100, 50, 0, RED);
 
       // draw text overlay
       DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
