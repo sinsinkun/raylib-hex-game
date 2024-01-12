@@ -97,6 +97,10 @@ void EventLoop::game() {
   Vector2 absPos = Vector2Add(screenCenter, normalizedPos);
   float relAngle = atan2(relPos.y, relPos.x);
 
+  // calculate wall position and rotation
+  Vector2 wallPos = { screenCenter.x, lifetime * 30 };
+  float wallAngle = lifetime;
+
   // add uniforms to background shader
   float screenSize[2] = { (float)w, (float)h };
   SetShaderValue(shaders[0], GetShaderLocation(shaders[0], "t"), &lifetime, SHADER_UNIFORM_FLOAT);
@@ -115,16 +119,16 @@ void EventLoop::game() {
       EndShaderMode();
       
       // draw rotating hex
-      DrawPoly(screenCenter, 6, 50, lifetime * 10, primaryColor);
-      // draw triangle
+      DrawPoly(screenCenter, 6, 50, lifetime * 180.0 / PI, primaryColor);
+      // draw user triangle
       DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
-      // debug line
-      // DrawLine(w/2, h/2, (int)mousePos.x, (int)mousePos.y, GREEN);
-      WallShape::DrawWall(screenCenter, 80, 25, lifetime * 10, RED);
+
+      // draw wall
+      WallShape::DrawWall(wallPos, 80, 25, wallAngle, RED);
 
       // draw pointer
       BeginShaderMode(shaders[1]);
-        DrawCircle((int)mousePos.x, (int)mousePos.y, 20, BLUE);
+        DrawCircle((int)mousePos.x, (int)mousePos.y, 20, BLACK);
       EndShaderMode();
 
       // draw text overlay
