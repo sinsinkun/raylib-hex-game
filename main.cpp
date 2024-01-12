@@ -12,7 +12,7 @@ enum Scene {
 
 class EventLoop {
   public:
-    Shader bgShader;
+    Shader shaders[2];
     Font font;
     Color primaryColor = WHITE;
     Scene scene;
@@ -43,17 +43,22 @@ void EventLoop::menu() {
   // Vector2 mousePos = GetMousePosition();
   // Vector2 screenCenter = { (float)w/2, (float)h/2 };
 
+  // show cursor
+  if (IsCursorHidden()) {
+    ShowCursor();
+  }
+
   // add uniforms to background shader
   float screenSize[2] = { (float)w, (float)h };
   float t = (float)elapsed;
-  SetShaderValue(bgShader, GetShaderLocation(bgShader, "t"), &t, SHADER_UNIFORM_FLOAT);
-  SetShaderValue(bgShader, GetShaderLocation(bgShader, "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
+  SetShaderValue(shaders[0], GetShaderLocation(shaders[0], "t"), &t, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(shaders[0], GetShaderLocation(shaders[0], "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
 
   // --- DRAW TO SCREEN ---
   BeginDrawing();
     ClearBackground(BLACK);
     // draw background
-    BeginShaderMode(bgShader);
+    BeginShaderMode(shaders[0]);
       DrawRectangle(0, 0, w, h, WHITE);
     EndShaderMode();
 
@@ -80,6 +85,10 @@ void EventLoop::game() {
   Vector2 mousePos = GetMousePosition();
   Vector2 screenCenter = { (float)w/2, (float)h/2 };
 
+  // hide cursor
+  if (!IsCursorHidden()) {
+    HideCursor();
+  }
   // calculate triangle position and rotation
   Vector2 relPos = Vector2Subtract(mousePos, screenCenter);
   Vector2 normalizedPos = Vector2Normalize(relPos);
@@ -90,15 +99,18 @@ void EventLoop::game() {
 
   // add uniforms to background shader
   float screenSize[2] = { (float)w, (float)h };
-  SetShaderValue(bgShader, GetShaderLocation(bgShader, "t"), &lifetime, SHADER_UNIFORM_FLOAT);
-  SetShaderValue(bgShader, GetShaderLocation(bgShader, "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
+  SetShaderValue(shaders[0], GetShaderLocation(shaders[0], "t"), &lifetime, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(shaders[0], GetShaderLocation(shaders[0], "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
+  SetShaderValue(shaders[1], GetShaderLocation(shaders[1], "t"), &lifetime, SHADER_UNIFORM_FLOAT);
+  SetShaderValue(shaders[1], GetShaderLocation(shaders[1], "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
+  SetShaderValue(shaders[1], GetShaderLocation(shaders[1], "mouse_pos"), &mousePos, SHADER_UNIFORM_VEC2);
 
   // --- DRAW TO SCREEN ---
   BeginDrawing();
     ClearBackground(BLACK);
     if (IsWindowFocused()) {
       // draw background
-      BeginShaderMode(bgShader);
+      BeginShaderMode(shaders[0]);
         DrawRectangle(0, 0, w, h, WHITE);
       EndShaderMode();
       
@@ -109,6 +121,11 @@ void EventLoop::game() {
       // debug line
       // DrawLine(w/2, h/2, (int)mousePos.x, (int)mousePos.y, GREEN);
       WallShape::DrawWall(screenCenter, 80, 25, lifetime * 10, RED);
+
+      // draw pointer
+      BeginShaderMode(shaders[1]);
+        DrawCircle((int)mousePos.x, (int)mousePos.y, 20, BLUE);
+      EndShaderMode();
 
       // draw text overlay
       DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
@@ -138,12 +155,14 @@ int main() {
   Font fontRetro = LoadFontEx("assets/retro_computer.ttf", 32, 0, 0);
   SetTextLineSpacing(48);
 
-  Shader shader = LoadShader(0, TextFormat("assets/test.frag", GLSL_VERSION));
+  Shader bgShader = LoadShader(0, TextFormat("assets/bg.frag", GLSL_VERSION));
+  Shader cursorShader = LoadShader(0, TextFormat("assets/cursor.frag", GLSL_VERSION));
   Color primary = GetColor(0xafaaecff);
 
   // add assets to event loop
   EventLoop eventLoop;
-  eventLoop.bgShader = shader;
+  eventLoop.shaders[0] = bgShader;
+  eventLoop.shaders[1] = cursorShader;
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
@@ -155,7 +174,9 @@ int main() {
   }
 
   // --- CLEAN UP ---
-  UnloadShader(shader);
+  for (Shader s : eventLoop.shaders) {
+    UnloadShader(s);
+  }
   UnloadFont(fontRetro);
   CloseWindow();
 
