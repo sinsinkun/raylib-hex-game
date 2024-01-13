@@ -3,6 +3,7 @@
 #include "raymath.h"
 #include "wall.h"
 #include "util.h"
+#include "timer.h"
 
 #define GLSL_VERSION 330
 
@@ -19,6 +20,7 @@ class EventLoop {
     Scene scene;
     float lifetime = 0;
     Wall walls[50];
+    BurstTimer spawnTimer;
     void root(); // main event loop
     void menu();
     void game();
@@ -105,17 +107,18 @@ void EventLoop::game() {
   // Vector2 wallPosRot = Util::rotate2d(screenCenter, wallPos, wallAngle);
 
   // spawn wall based on timer
-  bool spawnWallTime = ((int)lifetime % 4) == 0;
+  spawnTimer.update(GetFrameTime());
   // spawn new wall
   for (int i=0; i<50; i++) {
     // spawn new wall
-    if (spawnWallTime && !walls[i].spawned) {
+    if (spawnTimer.tick() && !walls[i].spawned) {
       walls[i].spawned = true;
       walls[i].w = 80;
       walls[i].w2 = 60;
       walls[i].h = 20;
       walls[i].color = RED;
       walls[i].rot = 0;
+      walls[i].pos = Vector2{ screenCenter.x, 0 };
       break;
     }
   }
@@ -123,7 +126,7 @@ void EventLoop::game() {
   // update walls
   for (int i=0; i<50; i++) {
     if (!walls[i].spawned) break;
-    printf("Updating wall %i", i);
+    printf("Updating wall %i\n", i);
     walls[i].update(GetFrameTime(), screenCenter);
   }
 
@@ -153,7 +156,7 @@ void EventLoop::game() {
       // Wall::DrawWall(wallPos, 80, 25, wallAngle, RED);
       for (int i=0; i<50; i++) {
         if (!walls[i].spawned) break;
-        printf("Drawing wall %i", i);
+        printf("Drawing wall %i\n", i);
         walls[i].draw();
       }
 
@@ -184,7 +187,7 @@ int main() {
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(800, 600, "Test Window");
   SetWindowMinSize(400, 300);
-  SetTargetFPS(120);
+  SetTargetFPS(30);
 
   // TTF font : Font data and atlas are generated directly from TTF
   Font fontRetro = LoadFontEx("assets/retro_computer.ttf", 32, 0, 0);
@@ -201,6 +204,8 @@ int main() {
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
+  eventLoop.spawnTimer.duration = 4.0;
+  eventLoop.spawnTimer.repeat = true;
   
   // --- EVENT LOOP ---
   printf("\n\n\n-- Starting Event Loop --\n");

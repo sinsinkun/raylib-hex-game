@@ -11,6 +11,7 @@ class Wall {
     Color color;
     void update(float delta, Vector2 center);
     void draw();
+    // bool shouldRemove(); TODO
     static void DrawWall(Vector2 center, float width, float height, float rotation, Color color);
   private:
     Vector2 rotPos;
