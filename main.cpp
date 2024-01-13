@@ -1,7 +1,8 @@
 #include <cstdio> // imports printf
 #include "raylib.h"
 #include "raymath.h"
-#include "wallShape.h"
+#include "wall.h"
+#include "util.h"
 
 #define GLSL_VERSION 330
 
@@ -17,6 +18,7 @@ class EventLoop {
     Color primaryColor = WHITE;
     Scene scene;
     float lifetime = 0;
+    Wall walls[50];
     void root(); // main event loop
     void menu();
     void game();
@@ -98,8 +100,32 @@ void EventLoop::game() {
   float relAngle = atan2(relPos.y, relPos.x);
 
   // calculate wall position and rotation
-  Vector2 wallPos = { screenCenter.x, lifetime * 30 };
-  float wallAngle = lifetime;
+  // Vector2 wallPos = { screenCenter.x, lifetime * 30 };
+  // float wallAngle = lifetime;
+  // Vector2 wallPosRot = Util::rotate2d(screenCenter, wallPos, wallAngle);
+
+  // spawn wall based on timer
+  bool spawnWallTime = ((int)lifetime % 4) == 0;
+  // spawn new wall
+  for (int i=0; i<50; i++) {
+    // spawn new wall
+    if (spawnWallTime && !walls[i].spawned) {
+      walls[i].spawned = true;
+      walls[i].w = 80;
+      walls[i].w2 = 60;
+      walls[i].h = 20;
+      walls[i].color = RED;
+      walls[i].rot = 0;
+      break;
+    }
+  }
+
+  // update walls
+  for (int i=0; i<50; i++) {
+    if (!walls[i].spawned) break;
+    printf("Updating wall %i", i);
+    walls[i].update(GetFrameTime(), screenCenter);
+  }
 
   // add uniforms to background shader
   float screenSize[2] = { (float)w, (float)h };
@@ -124,7 +150,12 @@ void EventLoop::game() {
       DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
 
       // draw wall
-      WallShape::DrawWall(wallPos, 80, 25, wallAngle, RED);
+      // Wall::DrawWall(wallPos, 80, 25, wallAngle, RED);
+      for (int i=0; i<50; i++) {
+        if (!walls[i].spawned) break;
+        printf("Drawing wall %i", i);
+        walls[i].draw();
+      }
 
       // draw pointer
       BeginShaderMode(shaders[1]);
