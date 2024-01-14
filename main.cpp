@@ -65,11 +65,14 @@ void EventLoop::menu() {
     BeginShaderMode(shaders[0]);
       DrawRectangle(0, 0, w, h, WHITE);
     EndShaderMode();
-
-    // draw text overlay
-    DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
-    DrawTextEx(font, TextFormat("Duration: %.*f", 2, lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
-    DrawTextEx(font, "Hit space to enter game", (Vector2){ (float)w/2 - 170, (float)h/2 - 10 }, 20, 3.5, WHITE);
+    if (IsWindowFocused()) {
+      // draw text overlay
+      DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
+      DrawTextEx(font, TextFormat("Duration: %.*f", 2, lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
+      DrawTextEx(font, "Hit space to enter game", (Vector2){ (float)w/2 - 170, (float)h/2 - 10 }, 20, 3.5, WHITE);
+    } else {
+      DrawText("Pay Attention to me", 10, 10, 20, RED);
+    }
   EndDrawing();
 
   // --- REGISTER INPUT ---
@@ -142,35 +145,30 @@ void EventLoop::game() {
   // --- DRAW TO SCREEN ---
   BeginDrawing();
     ClearBackground(BLACK);
-    if (IsWindowFocused()) {
-      // draw background
-      BeginShaderMode(shaders[0]);
-        DrawRectangle(0, 0, w, h, WHITE);
-      EndShaderMode();
+    // draw background
+    BeginShaderMode(shaders[0]);
+      DrawRectangle(0, 0, w, h, WHITE);
+    EndShaderMode();
 
-      // draw walls
-      for (int i=0; i<50; i++) {
-        if (!walls[i].spawned) continue;
-        walls[i].draw();
-      }
-      
-      // draw hex
-      DrawPoly(screenCenter, 6, 50, 0, primaryColor);
-      // draw user triangle
-      DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
-
-      // draw pointer
-      BeginShaderMode(shaders[1]);
-        DrawCircle((int)mousePos.x, (int)mousePos.y, 20, BLACK);
-      EndShaderMode();
-
-      // draw text overlay
-      DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
-      DrawTextEx(font, TextFormat("Duration: %.*f", 2, lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
-
-    } else {
-      DrawText("Pay attention to me", 10, 10, 24, RED);
+    // draw walls
+    for (int i=0; i<50; i++) {
+      if (!walls[i].spawned) continue;
+      walls[i].draw();
     }
+
+    // draw hex
+    DrawPoly(screenCenter, 6, 50, lifetime * 180.0 / PI, primaryColor);
+    // draw user triangle
+    DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
+
+    // draw pointer
+    BeginShaderMode(shaders[1]);
+      DrawCircle((int)mousePos.x, (int)mousePos.y, 20, BLACK);
+    EndShaderMode();
+
+    // draw text overlay
+    DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
+    DrawTextEx(font, TextFormat("Duration: %.*f", 2, lifetime), (Vector2){10, (float)h - 30}, 20, 3.5, WHITE);
   EndDrawing();
 
   // --- REGISTER INPUT ---
