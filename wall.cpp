@@ -16,7 +16,7 @@ void Wall::draw() {
 
 void Wall::update(float d, Vector2 c) {
   pos.x = c.x;
-  pos.y += d * 50;
+  pos.y += d * speed;
   if (rotate) rot += d;
   rotPos = Util::rotate2d(c, pos, rot);
   float cd = Util::distance(rotPos, c);

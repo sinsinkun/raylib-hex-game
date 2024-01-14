@@ -112,11 +112,13 @@ void EventLoop::game() {
     // spawn new wall
     if (spawnTimer.tick() && !walls[i].spawned) {
       walls[i].spawned = true;
+      walls[i].rotate = true;
+      walls[i].speed = 100;
       walls[i].w = screenCenter.y * 1.1547;
       walls[i].w2 = (screenCenter.y - 20) * 1.1547;
       walls[i].h = 20;
       walls[i].color = RED;
-      walls[i].rot = i * PI / 3; // change position based on index
+      walls[i].rot = lifetime + i * PI / 3; // change position based on index
       walls[i].pos = Vector2{ screenCenter.x, -20 };
       if (simul < 1) simul++;
       else break;
@@ -206,7 +208,7 @@ int main() {
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
-  eventLoop.spawnTimer.duration = 2.0;
+  eventLoop.spawnTimer.duration = 0.6;
   eventLoop.spawnTimer.repeat = true;
   
   // --- EVENT LOOP ---
