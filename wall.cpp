@@ -15,12 +15,13 @@ void Wall::draw() {
 }
 
 void Wall::update(float d, Vector2 c) {
+  pos.x = c.x;
   pos.y += d * 50;
-  rot += d;
+  if (rotate) rot += d;
   rotPos = Util::rotate2d(c, pos, rot);
   float cd = Util::distance(rotPos, c);
-  w = cd * 1.1547; // 1.1547 = 2 * tan(PI/6);
-  w2 = (cd - h) * 1.1547;
+  w = cd * 1.1547 + 12; // 1.1547 = 2 * tan(PI/6);
+  w2 = (cd - h) * 1.1547 + 12;
   // calculate if wall should be removed
   if (cd < 20 || w2 < 20) shouldRemove = true;
 }

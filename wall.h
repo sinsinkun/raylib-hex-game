@@ -4,6 +4,7 @@ class Wall {
   public:
     bool spawned;
     bool shouldRemove = false;
+    bool rotate = false;
     Vector2 pos;
     float w;
     float w2 = (w - h) * 1.1547; // 1.1547 = 2 * tan(PI/6)

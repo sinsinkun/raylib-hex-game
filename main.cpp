@@ -104,6 +104,7 @@ void EventLoop::game() {
   // spawn wall based on timer
   spawnTimer.update(GetFrameTime());
   // spawn new wall
+  int simul = 0;
   for (int i=0; i<50; i++) {
     // spawn new wall
     if (spawnTimer.tick() && !walls[i].spawned) {
@@ -112,9 +113,10 @@ void EventLoop::game() {
       walls[i].w2 = (screenCenter.y - 20) * 1.1547;
       walls[i].h = 20;
       walls[i].color = RED;
-      walls[i].rot = 0;
+      walls[i].rot = i * PI / 3; // change position based on index
       walls[i].pos = Vector2{ screenCenter.x, -20 };
-      break;
+      if (simul < 1) simul++;
+      else break;
     }
   }
 
@@ -152,8 +154,8 @@ void EventLoop::game() {
         walls[i].draw();
       }
       
-      // draw rotating hex
-      DrawPoly(screenCenter, 6, 50, lifetime * 180.0 / PI, primaryColor);
+      // draw hex
+      DrawPoly(screenCenter, 6, 50, 0, primaryColor);
       // draw user triangle
       DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
 
