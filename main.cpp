@@ -101,11 +101,6 @@ void EventLoop::game() {
   Vector2 absPos = Vector2Add(screenCenter, normalizedPos);
   float relAngle = atan2(relPos.y, relPos.x);
 
-  // calculate wall position and rotation
-  // Vector2 wallPos = { screenCenter.x, lifetime * 30 };
-  // float wallAngle = lifetime;
-  // Vector2 wallPosRot = Util::rotate2d(screenCenter, wallPos, wallAngle);
-
   // spawn wall based on timer
   spawnTimer.update(GetFrameTime());
   // spawn new wall
@@ -113,21 +108,25 @@ void EventLoop::game() {
     // spawn new wall
     if (spawnTimer.tick() && !walls[i].spawned) {
       walls[i].spawned = true;
-      walls[i].w = 80;
-      walls[i].w2 = 60;
+      walls[i].w = screenCenter.y * 1.1547;
+      walls[i].w2 = (screenCenter.y - 20) * 1.1547;
       walls[i].h = 20;
       walls[i].color = RED;
       walls[i].rot = 0;
-      walls[i].pos = Vector2{ screenCenter.x, 0 };
+      walls[i].pos = Vector2{ screenCenter.x, -20 };
       break;
     }
   }
 
   // update walls
   for (int i=0; i<50; i++) {
-    if (!walls[i].spawned) break;
-    printf("Updating wall %i\n", i);
-    walls[i].update(GetFrameTime(), screenCenter);
+    if (!walls[i].spawned) continue;
+    if (walls[i].shouldRemove) {
+      walls[i].spawned = false;
+      walls[i].shouldRemove = false;
+    } else {
+      walls[i].update(GetFrameTime(), screenCenter);
+    }
   }
 
   // add uniforms to background shader
@@ -146,19 +145,17 @@ void EventLoop::game() {
       BeginShaderMode(shaders[0]);
         DrawRectangle(0, 0, w, h, WHITE);
       EndShaderMode();
+
+      // draw walls
+      for (int i=0; i<50; i++) {
+        if (!walls[i].spawned) continue;
+        walls[i].draw();
+      }
       
       // draw rotating hex
       DrawPoly(screenCenter, 6, 50, lifetime * 180.0 / PI, primaryColor);
       // draw user triangle
       DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
-
-      // draw wall
-      // Wall::DrawWall(wallPos, 80, 25, wallAngle, RED);
-      for (int i=0; i<50; i++) {
-        if (!walls[i].spawned) break;
-        printf("Drawing wall %i\n", i);
-        walls[i].draw();
-      }
 
       // draw pointer
       BeginShaderMode(shaders[1]);
@@ -177,6 +174,11 @@ void EventLoop::game() {
   // --- REGISTER INPUT ---
   if (IsKeyPressed(KEY_SPACE)) {
     scene = Scene::menu;
+    // reset walls
+    for (int i=0; i<50; i++) {
+      walls[i].spawned = false;
+      walls[i].shouldRemove = false;
+    }
   }
 }
 
@@ -185,9 +187,9 @@ int main() {
   // SetWindowIcon(image);
   SetConfigFlags(FLAG_WINDOW_RESIZABLE); // Window configuration flags
   SetConfigFlags(FLAG_MSAA_4X_HINT);
-  InitWindow(800, 600, "Test Window");
+  InitWindow(800, 600, "Hex 2");
   SetWindowMinSize(400, 300);
-  SetTargetFPS(30);
+  SetTargetFPS(60);
 
   // TTF font : Font data and atlas are generated directly from TTF
   Font fontRetro = LoadFontEx("assets/retro_computer.ttf", 32, 0, 0);
@@ -204,7 +206,7 @@ int main() {
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
-  eventLoop.spawnTimer.duration = 4.0;
+  eventLoop.spawnTimer.duration = 2.0;
   eventLoop.spawnTimer.repeat = true;
   
   // --- EVENT LOOP ---
