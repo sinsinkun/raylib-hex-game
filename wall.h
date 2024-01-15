@@ -16,6 +16,7 @@ class Wall {
     void draw();
     bool rayCastCollision(Vector2 point);
     bool pointRadiusCollision(Vector2 point, float radius);
+    void debug();
   private:
     Vector2 rotPos = { 0, 0 };
     Vector2 vA = { 0, 0 };

@@ -29,7 +29,7 @@ void Wall::update(float d, Vector2 c) {
 
 // check collision via infinite horizontal raycasting
 bool Wall::rayCastCollision(Vector2 p) {
-  if (pos.y < 100) return false;
+  if (Util::distance(rotPos, p) > 100) return false;
   int count = 0;
   // edges: vAvB, vBvC, vCvD, vAvD
   Vector2 edges[8] = { vA, vB, vB, vC, vC, vD, vD, vA};
@@ -48,12 +48,15 @@ bool Wall::rayCastCollision(Vector2 p) {
 
 // check collision via point radius
 bool Wall::pointRadiusCollision(Vector2 p, float r) {
-  // TODO: neighbourhood pre-check
-
-  // individual points check
-  if (Util::distance(vA, p) < r) return true;
-  if (Util::distance(vA, p) < r) return true;
-  if (Util::distance(vA, p) < r) return true;
-  if (Util::distance(vA, p) < r) return true;
+  // need to check point to radius to wall
   return false;
+}
+
+void Wall::debug() {
+  printf("Wall debug info: ");
+  printf("A: (%f, %f) ", vA.x, vA.y);
+  printf("B: (%f, %f) ", vB.x, vB.y);
+  printf("C: (%f, %f) ", vC.x, vC.y);
+  printf("D: (%f, %f) ", vD.x, vD.y);
+  printf("rotation: %f\n", rot);
 }

@@ -63,11 +63,11 @@ void EventLoop::menu() {
   // --- DRAW TO SCREEN ---
   BeginDrawing();
     ClearBackground(BLACK);
-    // draw background
-    BeginShaderMode(shaders[0]);
-      DrawRectangle(0, 0, w, h, WHITE);
-    EndShaderMode();
     if (IsWindowFocused()) {
+      // draw background
+      BeginShaderMode(shaders[0]);
+        DrawRectangle(0, 0, w, h, WHITE);
+      EndShaderMode();
       // draw text overlay
       DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
       DrawTextEx(font, TextFormat("Duration: %.*f", 2, lifetime), (Vector2){ 10, (float)h - 30 }, 20, 3.5, WHITE);
@@ -114,7 +114,7 @@ void EventLoop::game() {
       walls[i].w = 100;
       walls[i].w2 = 100;
       walls[i].h = 20;
-      walls[i].color = RED;
+      walls[i].color = BLUE;
       walls[i].rot = lifetime + i * PI / 3; // change position based on index
       walls[i].pos = Vector2{ screenCenter.x, -20.0 };
       if (simul < 4) simul++;
@@ -131,8 +131,10 @@ void EventLoop::game() {
     } else {
       walls[i].update(GetFrameTime(), screenCenter);
       if (walls[i].spawned && walls[i].rayCastCollision(pTri.pos)) {
+        walls[i].color = RED;
         printf("Collided with wall %i\n", i);
         printf("position %f %f\n", pTri.pos.x, pTri.pos.y);
+        walls[i].debug();
       };
     }
   }
