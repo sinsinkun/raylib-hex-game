@@ -15,6 +15,7 @@ enum Scene {
 
 class EventLoop {
   public:
+    bool paused = false;
     Shader shaders[2];
     Font font;
     Color primaryColor = WHITE;
@@ -81,6 +82,7 @@ void EventLoop::menu() {
   if (IsKeyPressed(KEY_SPACE)) {
     scene = Scene::game;
     lifetime = 0;
+    paused = false;
   }
 }
 
@@ -90,7 +92,7 @@ void EventLoop::game() {
   int w = GetScreenWidth();
   int h = GetScreenHeight();
   int fps = GetFPS();
-  lifetime += GetFrameTime();
+  if (!paused) lifetime += GetFrameTime();
   Vector2 mousePos = GetMousePosition();
   Vector2 screenCenter = { (float)w/2, (float)h/2 };
 
@@ -99,13 +101,13 @@ void EventLoop::game() {
     HideCursor();
   }
   // calculate triangle position and rotation
-  pTri.update(screenCenter, mousePos);
+  if (!paused) pTri.update(screenCenter, mousePos);
 
   // spawn wall based on timer
   spawnTimer.update(GetFrameTime());
   // spawn new wall
   int simul = 0;
-  for (int i=0; i<50; i++) {
+  if (!paused) for (int i=0; i<50; i++) {
     // spawn new wall
     if (spawnTimer.tick() && !walls[i].spawned) {
       walls[i].spawned = true;
@@ -123,7 +125,7 @@ void EventLoop::game() {
   }
 
   // update walls
-  for (int i=0; i<50; i++) {
+  if (!paused) for (int i=0; i<50; i++) {
     if (!walls[i].spawned) continue;
     if (walls[i].shouldRemove) {
       walls[i].spawned = false;
@@ -135,6 +137,7 @@ void EventLoop::game() {
         printf("Collided with wall %i\n", i);
         printf("position %f %f\n", pTri.pos.x, pTri.pos.y);
         walls[i].debug();
+        paused = true;
       };
     }
   }
@@ -174,6 +177,10 @@ void EventLoop::game() {
     // draw text overlay
     DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
     DrawTextEx(font, TextFormat("Duration: %.*f", 2, lifetime), (Vector2){10, (float)h - 30}, 20, 3.5, WHITE);
+    if (paused) {
+      DrawTextEx(font, TextFormat("Game Over! You survived %.*f Seconds.", 2, lifetime), (Vector2){ (float)w/2 - 250, (float)h/2}, 20, 3.5, WHITE);
+      DrawTextEx(font, "Hit space to go back to menu", (Vector2){ (float)w/2 - 200, (float)h/2 + 30}, 20, 3.5, WHITE);
+    }
   EndDrawing();
 
   // --- REGISTER INPUT ---

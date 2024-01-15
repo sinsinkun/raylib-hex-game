@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "raymath.h"
 #include "wall.h"
 #include "math.h"
 #include "util.h"
@@ -27,7 +28,7 @@ void Wall::update(float d, Vector2 c) {
   if (cd < 20 || w2 < 20) shouldRemove = true;
 }
 
-// check collision via infinite horizontal raycasting
+// check point collision via infinite horizontal raycasting
 bool Wall::rayCastCollision(Vector2 p) {
   if (Util::distance(rotPos, p) > 100) return false;
   int count = 0;
@@ -46,11 +47,32 @@ bool Wall::rayCastCollision(Vector2 p) {
   return count % 2;
 }
 
-// check collision via point radius
+// check circular collision via SAT
 bool Wall::pointRadiusCollision(Vector2 p, float r) {
-  // need to check point to radius to wall
-  return false;
+  if (Util::distance(rotPos, p) > 100) return false;
+  // edges: vAvB, vBvC, vCvD, vAvD
+  Vector2 edges[8] = { vA, vB, vB, vC, vC, vD, vD, vA };
+  for (int i=0; i < 8; i+=2) {
+    Vector2 p1 = edges[i];
+    Vector2 p2 = edges[i+1];
+    // set p1 as origin
+    Vector2 p1pr = Vector2Subtract(p, p1);
+    Vector2 p1p2 = Vector2Subtract(p2, p1);
+    Vector2 p1p3 = Util::projection2d(p1pr, p1p2);
+    float p1p2len = Vector2Length(p1p2);
+    float p1p3len = Vector2Length(p1p3);
+    // any gap == not colliding
+    if (p1p3len > 0 && p1p2len > (p1p3len - r)) {
+      return false;
+    } else if ((p1p3len + r) > p1p2len) {
+      return false;
+    }
+  }
+  printf("DEBUG: collide??\n");
+  return true;
 }
+
+// TODO: alternative collision detection: Separating Axis Theorem
 
 void Wall::debug() {
   printf("Wall debug info: ");

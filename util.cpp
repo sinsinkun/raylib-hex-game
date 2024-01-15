@@ -15,6 +15,12 @@ Vector2 Util::rotate2d(Vector2 p, float r) {
   return o;
 }
 
+Vector2 Util::projection2d(Vector2 a, Vector2 b) {
+  float k = Vector2DotProduct(a, b) / Vector2DotProduct(b, b);
+  Vector2 o = { k * b.x, k * b.y };
+  return o;
+}
+
 float Util::distance(Vector2 a, Vector2 b) {
   return Vector2Distance(a, b);
 }
