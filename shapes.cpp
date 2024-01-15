@@ -1,6 +1,27 @@
+
+#include <cstdio>
+#include "math.h"
 #include "raylib.h"
 #include "raymath.h"
-#include "triangle.h"
+#include "util.h"
+#include "shapes.h"
+
+using namespace Shapes;
+
+/* -- HEXAGON METHODS -- */
+
+void Hexagon::draw() {
+  // need to convert angle from rad to deg
+  DrawPoly(pos, 6, 50, angle * 180.0 / PI, color);
+}
+
+void Hexagon::update(float d, Vector2 c) {
+  pos = c;
+  if (rotate) angle += d;
+  printf("What is angle %f", angle);
+}
+
+/* -- TRIANGLE METHODS -- */
 
 void Triangle::update(Vector2 c, Vector2 m) {
   Vector2 relPos = Vector2Subtract(m, c);

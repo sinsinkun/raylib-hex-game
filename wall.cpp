@@ -49,7 +49,7 @@ bool Wall::rayCastCollision(Vector2 p) {
 
 // check circular collision via SAT
 bool Wall::pointRadiusCollision(Vector2 p, float r) {
-  if (Util::distance(rotPos, p) > 100) return false;
+  if (Util::distance(rotPos, p) - r > w) return false;
   // edges: vAvB, vBvC, vCvD, vAvD
   Vector2 edges[8] = { vA, vB, vB, vC, vC, vD, vD, vA };
   for (int i=0; i < 8; i+=2) {
@@ -59,17 +59,14 @@ bool Wall::pointRadiusCollision(Vector2 p, float r) {
     Vector2 p1pr = Vector2Subtract(p, p1);
     Vector2 p1p2 = Vector2Subtract(p2, p1);
     Vector2 p1p3 = Util::projection2d(p1pr, p1p2);
-    float p1p2len = Vector2Length(p1p2);
-    float p1p3len = Vector2Length(p1p3);
-    // any gap == not colliding
-    if (p1p3len > 0 && p1p2len > (p1p3len - r)) {
-      return false;
-    } else if ((p1p3len + r) > p1p2len) {
-      return false;
+    // calculate distance
+    float d = 999.0; // idk man
+    if (d <= r) {
+      printf("DEBUG: collide?? %f\n", d);
+      return true;
     }
   }
-  printf("DEBUG: collide??\n");
-  return true;
+  return false;
 }
 
 // TODO: alternative collision detection: Separating Axis Theorem

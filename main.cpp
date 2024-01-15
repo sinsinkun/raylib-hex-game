@@ -1,10 +1,10 @@
 #include <cstdio> // imports printf
 #include "raylib.h"
 #include "raymath.h"
-#include "wall.h"
 #include "util.h"
 #include "timer.h"
-#include "triangle.h"
+#include "shapes.h"
+#include "wall.h"
 
 #define GLSL_VERSION 330
 
@@ -21,7 +21,8 @@ class EventLoop {
     Color primaryColor = WHITE;
     Scene scene;
     float lifetime = 0;
-    Triangle pTri;
+    Shapes::Hexagon hex;
+    Shapes::Triangle tri;
     Wall walls[50];
     BurstTimer spawnTimer;
     void root(); // main event loop
@@ -92,7 +93,7 @@ void EventLoop::game() {
   int w = GetScreenWidth();
   int h = GetScreenHeight();
   int fps = GetFPS();
-  if (!paused) lifetime += GetFrameTime();
+  float deltaT = GetFrameTime();
   Vector2 mousePos = GetMousePosition();
   Vector2 screenCenter = { (float)w/2, (float)h/2 };
 
@@ -100,12 +101,18 @@ void EventLoop::game() {
   if (!IsCursorHidden()) {
     HideCursor();
   }
-  // calculate triangle position and rotation
-  if (!paused) pTri.update(screenCenter, mousePos);
-
-  // spawn wall based on timer
-  spawnTimer.update(GetFrameTime());
-  // spawn new wall
+  
+  if (!paused) {
+    lifetime += deltaT;
+    // calculate triangle position and rotation
+    tri.update(screenCenter, mousePos);
+    // calculate hex position and rotation
+    hex.update(deltaT, screenCenter);
+    // spawn wall based on timer
+    spawnTimer.update(deltaT);
+  }
+  
+  // spawn new walls
   int simul = 0;
   if (!paused) for (int i=0; i<50; i++) {
     // spawn new wall
@@ -132,10 +139,10 @@ void EventLoop::game() {
       walls[i].shouldRemove = false;
     } else {
       walls[i].update(GetFrameTime(), screenCenter);
-      if (walls[i].spawned && walls[i].rayCastCollision(pTri.pos)) {
+      if (walls[i].spawned && walls[i].pointRadiusCollision(tri.pos, 40)) {
         walls[i].color = RED;
         printf("Collided with wall %i\n", i);
-        printf("position %f %f\n", pTri.pos.x, pTri.pos.y);
+        printf("position %f %f\n", tri.pos.x, tri.pos.y);
         walls[i].debug();
         paused = true;
       };
@@ -165,9 +172,9 @@ void EventLoop::game() {
     }
 
     // draw hex
-    DrawPoly(screenCenter, 6, 50, lifetime * 180.0 / PI, primaryColor);
+    hex.draw();
     // draw user triangle
-    pTri.draw();
+    tri.draw();
 
     // draw pointer
     BeginShaderMode(shaders[1]);
@@ -220,7 +227,9 @@ int main() {
   eventLoop.scene = Scene::menu;
   eventLoop.spawnTimer.duration = 1.2;
   eventLoop.spawnTimer.repeat = true;
-  eventLoop.pTri.color = primary;
+  eventLoop.tri.color = primary;
+  eventLoop.hex.color = primary;
+  eventLoop.hex.rotate = true;
   
   // --- EVENT LOOP ---
   printf("\n\n\n-- Starting Event Loop --\n");
