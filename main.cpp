@@ -4,6 +4,7 @@
 #include "wall.h"
 #include "util.h"
 #include "timer.h"
+#include "triangle.h"
 
 #define GLSL_VERSION 330
 
@@ -19,6 +20,7 @@ class EventLoop {
     Color primaryColor = WHITE;
     Scene scene;
     float lifetime = 0;
+    Triangle pTri;
     Wall walls[50];
     BurstTimer spawnTimer;
     void root(); // main event loop
@@ -97,12 +99,7 @@ void EventLoop::game() {
     HideCursor();
   }
   // calculate triangle position and rotation
-  Vector2 relPos = Vector2Subtract(mousePos, screenCenter);
-  Vector2 normalizedPos = Vector2Normalize(relPos);
-  normalizedPos.x = 65.0 * normalizedPos.x;
-  normalizedPos.y = 65.0 * normalizedPos.y;
-  Vector2 absPos = Vector2Add(screenCenter, normalizedPos);
-  float relAngle = atan2(relPos.y, relPos.x);
+  pTri.update(screenCenter, mousePos);
 
   // spawn wall based on timer
   spawnTimer.update(GetFrameTime());
@@ -113,14 +110,14 @@ void EventLoop::game() {
     if (spawnTimer.tick() && !walls[i].spawned) {
       walls[i].spawned = true;
       walls[i].rotate = true;
-      walls[i].speed = 100;
-      walls[i].w = screenCenter.y * 1.1547;
-      walls[i].w2 = (screenCenter.y - 20) * 1.1547;
+      walls[i].speed = 120;
+      walls[i].w = 100;
+      walls[i].w2 = 100;
       walls[i].h = 20;
       walls[i].color = RED;
       walls[i].rot = lifetime + i * PI / 3; // change position based on index
-      walls[i].pos = Vector2{ screenCenter.x, -20 };
-      if (simul < 1) simul++;
+      walls[i].pos = Vector2{ screenCenter.x, -20.0 };
+      if (simul < 4) simul++;
       else break;
     }
   }
@@ -133,6 +130,10 @@ void EventLoop::game() {
       walls[i].shouldRemove = false;
     } else {
       walls[i].update(GetFrameTime(), screenCenter);
+      if (walls[i].spawned && walls[i].rayCastCollision(pTri.pos)) {
+        printf("Collided with wall %i\n", i);
+        printf("position %f %f\n", pTri.pos.x, pTri.pos.y);
+      };
     }
   }
 
@@ -161,7 +162,7 @@ void EventLoop::game() {
     // draw hex
     DrawPoly(screenCenter, 6, 50, lifetime * 180.0 / PI, primaryColor);
     // draw user triangle
-    DrawPoly(absPos, 3, 10, relAngle * 180.0 / PI, primaryColor);
+    pTri.draw();
 
     // draw pointer
     BeginShaderMode(shaders[1]);
@@ -208,8 +209,9 @@ int main() {
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
-  eventLoop.spawnTimer.duration = 0.6;
+  eventLoop.spawnTimer.duration = 1.2;
   eventLoop.spawnTimer.repeat = true;
+  eventLoop.pTri.color = primary;
   
   // --- EVENT LOOP ---
   printf("\n\n\n-- Starting Event Loop --\n");
