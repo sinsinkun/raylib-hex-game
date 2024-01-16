@@ -126,7 +126,7 @@ void EventLoop::game() {
       walls[i].color = BLUE;
       walls[i].rot = lifetime + i * PI / 3; // change position based on index
       walls[i].pos = Vector2{ screenCenter.x, -20.0 };
-      if (simul < 4) simul++;
+      if (simul < 3) simul++;
       else break;
     }
   }
@@ -138,8 +138,8 @@ void EventLoop::game() {
       walls[i].spawned = false;
       walls[i].shouldRemove = false;
     } else {
-      walls[i].update(GetFrameTime(), screenCenter);
-      if (walls[i].spawned && walls[i].pointRadiusCollision(tri.pos, 40)) {
+      walls[i].update(deltaT, screenCenter);
+      if (walls[i].spawned && walls[i].pointRadiusCollision(tri.pos, 6.0)) {
         walls[i].color = RED;
         printf("Collided with wall %i\n", i);
         printf("position %f %f\n", tri.pos.x, tri.pos.y);

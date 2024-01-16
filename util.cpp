@@ -24,3 +24,9 @@ Vector2 Util::projection2d(Vector2 a, Vector2 b) {
 float Util::distance(Vector2 a, Vector2 b) {
   return Vector2Distance(a, b);
 }
+
+Vector2 Util::normal2d(Vector2 a, Vector2 b) {
+  float dx = b.x - a.x;
+  float dy = b.y - a.y;
+  return Vector2 { -dy, dx };
+}

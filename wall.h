@@ -18,9 +18,9 @@ class Wall {
     bool pointRadiusCollision(Vector2 point, float radius);
     void debug();
   private:
-    Vector2 rotPos = { 0, 0 };
-    Vector2 vA = { 0, 0 };
-    Vector2 vB = { 0, 0 };
-    Vector2 vC = { 0, 0 };
-    Vector2 vD = { 0, 0 };
+    Vector2 rotPos = { 999999.0, 999999.0 };
+    Vector2 vA = { 999999.0, 999999.0 };
+    Vector2 vB = { 999999.0, 999999.0 };
+    Vector2 vC = { 999999.0, 999999.0 };
+    Vector2 vD = { 999999.0, 999999.0 };
 };

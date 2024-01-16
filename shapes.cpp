@@ -1,4 +1,3 @@
-
 #include <cstdio>
 #include "math.h"
 #include "raylib.h"
@@ -18,7 +17,6 @@ void Hexagon::draw() {
 void Hexagon::update(float d, Vector2 c) {
   pos = c;
   if (rotate) angle += d;
-  printf("What is angle %f", angle);
 }
 
 /* -- TRIANGLE METHODS -- */

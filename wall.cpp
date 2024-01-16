@@ -30,6 +30,7 @@ void Wall::update(float d, Vector2 c) {
 
 // check point collision via infinite horizontal raycasting
 bool Wall::rayCastCollision(Vector2 p) {
+  // set max range of collision space
   if (Util::distance(rotPos, p) > 100) return false;
   int count = 0;
   // edges: vAvB, vBvC, vCvD, vAvD
@@ -49,24 +50,29 @@ bool Wall::rayCastCollision(Vector2 p) {
 
 // check circular collision via SAT
 bool Wall::pointRadiusCollision(Vector2 p, float r) {
-  if (Util::distance(rotPos, p) - r > w) return false;
+  // set max range of collision space
+  if (Util::distance(rotPos, p) > 100) return false;
   // edges: vAvB, vBvC, vCvD, vAvD
   Vector2 edges[8] = { vA, vB, vB, vC, vC, vD, vD, vA };
   for (int i=0; i < 8; i+=2) {
     Vector2 p1 = edges[i];
     Vector2 p2 = edges[i+1];
-    // set p1 as origin
-    Vector2 p1pr = Vector2Subtract(p, p1);
-    Vector2 p1p2 = Vector2Subtract(p2, p1);
-    Vector2 p1p3 = Util::projection2d(p1pr, p1p2);
-    // calculate distance
-    float d = 999.0; // idk man
-    if (d <= r) {
-      printf("DEBUG: collide?? %f\n", d);
-      return true;
+    // calculate normal axis
+    Vector2 n = Vector2Normalize(Util::normal2d(p1, p2));
+    // find min/max of projections
+    float min = Vector2DotProduct(vA, n);
+    float max = min;
+    for (int i=0; i < 8; i+=2) {
+      float proj = Vector2DotProduct(edges[i], n);
+      if (proj < min) min = proj;
+      else if (proj > max) max = proj;
     }
+    float projp = Vector2DotProduct(p, n);
+    // check maximum + minimum
+    if (projp - r > max || projp + r < min) return false;
   }
-  return false;
+  // no gaps in axes found == colliding
+  return true;
 }
 
 // TODO: alternative collision detection: Separating Axis Theorem
