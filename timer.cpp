@@ -13,3 +13,7 @@ void BurstTimer::update(float d) {
 bool BurstTimer::tick() {
   return timeUp;
 }
+
+void BurstTimer::reset() {
+  dt = 0;
+}

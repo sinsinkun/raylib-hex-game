@@ -19,6 +19,7 @@ void Wall::draw() {
 void Wall::update(float d, Vector2 c) {
   pos.x = c.x;
   pos.y += d * speed;
+  speed += 0.1;
   if (rotate) rot += d;
   rotPos = Util::rotate2d(c, pos, rot);
   float cd = Util::distance(rotPos, c);
@@ -52,9 +53,9 @@ bool Wall::rayCastCollision(Vector2 p) {
 bool Wall::pointRadiusCollision(Vector2 p, float r) {
   // set max range of collision space
   if (Util::distance(rotPos, p) > 100) return false;
-  // edges: vAvB, vBvC, vCvD, vAvD
-  Vector2 edges[8] = { vA, vB, vB, vC, vC, vD, vD, vA };
-  for (int i=0; i < 8; i+=2) {
+  // edges: vAvB, vBvC, vCvD (ignore vDvA)
+  Vector2 edges[6] = { vA, vB, vB, vC, vC, vD };
+  for (int i=0; i < 6; i+=2) {
     Vector2 p1 = edges[i];
     Vector2 p2 = edges[i+1];
     // calculate normal axis
@@ -62,7 +63,7 @@ bool Wall::pointRadiusCollision(Vector2 p, float r) {
     // find min/max of projections
     float min = Vector2DotProduct(vA, n);
     float max = min;
-    for (int i=0; i < 8; i+=2) {
+    for (int i=0; i < 6; i+=2) {
       float proj = Vector2DotProduct(edges[i], n);
       if (proj < min) min = proj;
       else if (proj > max) max = proj;

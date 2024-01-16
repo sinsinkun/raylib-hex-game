@@ -83,6 +83,8 @@ void EventLoop::menu() {
   if (IsKeyPressed(KEY_SPACE)) {
     scene = Scene::game;
     lifetime = 0;
+    hex.angle = 0;
+    spawnTimer.reset();
     paused = false;
   }
 }
@@ -124,7 +126,7 @@ void EventLoop::game() {
       walls[i].w2 = 100;
       walls[i].h = 20;
       walls[i].color = BLUE;
-      walls[i].rot = lifetime + i * PI / 3; // change position based on index
+      walls[i].rot = lifetime + (i * PI / 3); // change position based on index
       walls[i].pos = Vector2{ screenCenter.x, -20.0 };
       if (simul < 3) simul++;
       else break;
@@ -140,10 +142,12 @@ void EventLoop::game() {
     } else {
       walls[i].update(deltaT, screenCenter);
       if (walls[i].spawned && walls[i].pointRadiusCollision(tri.pos, 6.0)) {
+        if (Util::distance(screenCenter, walls[i].pos) < 45.0) {
+          // if wall is behind triangle, ignore collision
+          continue;
+        }
         walls[i].color = RED;
         printf("Collided with wall %i\n", i);
-        printf("position %f %f\n", tri.pos.x, tri.pos.y);
-        walls[i].debug();
         paused = true;
       };
     }
@@ -225,7 +229,7 @@ int main() {
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
-  eventLoop.spawnTimer.duration = 1.2;
+  eventLoop.spawnTimer.duration = 0.8;
   eventLoop.spawnTimer.repeat = true;
   eventLoop.tri.color = primary;
   eventLoop.hex.color = primary;
