@@ -13,9 +13,15 @@ enum Scene {
   game
 };
 
+enum PauseType {
+  unpaused,
+  paused,
+  gameover
+};
+
 class EventLoop {
   public:
-    bool paused = false;
+    PauseType paused = unpaused;
     Shader shaders[2];
     Font font;
     Color primaryColor = WHITE;
@@ -85,7 +91,7 @@ void EventLoop::menu() {
     lifetime = 0;
     hex.angle = 0;
     spawnTimer.reset();
-    paused = false;
+    paused = PauseType::unpaused;
   }
 }
 
@@ -104,7 +110,7 @@ void EventLoop::game() {
     HideCursor();
   }
   
-  if (!paused) {
+  if (paused == PauseType::unpaused) {
     lifetime += deltaT;
     // calculate triangle position and rotation
     tri.update(screenCenter, mousePos);
@@ -117,39 +123,43 @@ void EventLoop::game() {
   // spawn new walls
   int simul = 0;
   int wallLim = (int)lifetime % 4 + 1;
-  if (!paused) for (int i=0; i<50; i++) {
-    // spawn new wall
-    if (spawnTimer.tick() && !walls[i].spawned) {
-      if (wallLim % 2) walls[i].spawn(WallType::TriCollide, Vector2{ screenCenter.x, -1000.0 }, i, lifetime);
-      else walls[i].spawn(WallType::MouseCollide, Vector2{ screenCenter.x, -1000.0 }, i, lifetime);
-      if (simul == 0) spawnTimer.duration -= 0.005;
-      if (simul < wallLim) simul++;
-      else break;
+  if (paused == PauseType::unpaused) {
+    for (int i=0; i<50; i++) {
+      // spawn new wall
+      if (spawnTimer.tick() && !walls[i].spawned) {
+        if (wallLim % 2) walls[i].spawn(WallType::TriCollide, Vector2{ screenCenter.x, -500.0 }, i, lifetime);
+        else walls[i].spawn(WallType::MouseCollide, Vector2{ screenCenter.x, -500.0 }, i, lifetime);
+        if (simul == 0) spawnTimer.duration -= 0.005;
+        if (simul < wallLim) simul++;
+        else break;
+      }
     }
   }
 
   // update walls
-  if (!paused) for (int i=0; i<50; i++) {
-    if (!walls[i].spawned) continue;
-    if (walls[i].shouldRemove) {
-      walls[i].spawned = false;
-      walls[i].shouldRemove = false;
-      walls[i].type = WallType::Unspawned;
-    } else {
-      walls[i].update(deltaT, screenCenter);
-      if (walls[i].type == WallType::TriCollide && walls[i].pointRadiusCollision(tri.pos, 6.0)) {
-        if (Util::distance(screenCenter, walls[i].pos) < 45.0) {
-          // if wall is behind triangle, ignore collision
-          continue;
-        }
-        walls[i].color = RED;
-        printf("Collided with wall (tri) %i\n", i);
-        paused = true;
-      } else if (walls[i].type == WallType::MouseCollide && walls[i].pointRadiusCollision(mousePos, 18.0)) {
-        walls[i].color = RED;
-        printf("Collided with wall (mouse) %i\n", i);
-        paused = true;
-      };
+  if (paused == PauseType::unpaused) {
+    for (int i=0; i<50; i++) {
+      if (!walls[i].spawned) continue;
+      if (walls[i].shouldRemove) {
+        walls[i].spawned = false;
+        walls[i].shouldRemove = false;
+        walls[i].type = WallType::Unspawned;
+      } else {
+        walls[i].update(deltaT, screenCenter);
+        if (walls[i].type == WallType::TriCollide && walls[i].pointRadiusCollision(tri.pos, 6.0)) {
+          if (Util::distance(screenCenter, walls[i].pos) < 45.0) {
+            // if wall is behind triangle, ignore collision
+            continue;
+          }
+          walls[i].color = RED;
+          printf("Collided with wall (tri) %i\n", i);
+          paused = PauseType::gameover;
+        } else if (walls[i].type == WallType::MouseCollide && walls[i].pointRadiusCollision(mousePos, 18.0)) {
+          walls[i].color = MAGENTA;
+          printf("Collided with wall (mouse) %i\n", i);
+          paused = PauseType::gameover;
+        };
+      }
     }
   }
 
@@ -188,7 +198,10 @@ void EventLoop::game() {
     // draw text overlay
     DrawTextEx(font, TextFormat("FPS: %i", fps), (Vector2){ 10, 10 }, 20, 3.5, WHITE);
     DrawTextEx(font, TextFormat("Duration: %.*f", 2, lifetime), (Vector2){10, (float)h - 30}, 20, 3.5, WHITE);
-    if (paused) {
+    if (paused == PauseType::paused) {
+      DrawTextEx(font, "Paused", (Vector2){ (float)w/2 - 70, (float)h/2 - 12 }, 30, 3.5, WHITE);
+    }
+    if (paused == PauseType::gameover) {
       DrawTextEx(font, TextFormat("Game Over! You survived %.*f Seconds.", 2, lifetime), (Vector2){ (float)w/2 - 250, (float)h/2}, 20, 3.5, WHITE);
       DrawTextEx(font, "Hit space to go back to menu", (Vector2){ (float)w/2 - 200, (float)h/2 + 30}, 20, 3.5, WHITE);
     }
@@ -196,6 +209,14 @@ void EventLoop::game() {
 
   // --- REGISTER INPUT ---
   if (IsKeyPressed(KEY_SPACE)) {
+    if (paused == PauseType::unpaused) {
+      paused = PauseType::paused;
+      return;
+    }
+    if (paused == PauseType::paused) {
+      paused = PauseType::unpaused;
+      return;
+    }
     scene = Scene::menu;
     // reset walls
     for (int i=0; i<50; i++) {
