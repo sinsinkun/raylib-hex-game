@@ -1,9 +1,18 @@
-## Basic parameters for starting a raylib project in vscode on windows
+## Hex Game
 
-- assumption that raylib is installed with default settings to C:/raylib/raylib
+![Screenshot](assets/screenshot.png)
 
-- raylib available from website: https://www.raylib.com/
+This is a basic arcade game inspired by Super Hexagon.
 
-- tested with msys2 compiler setup from here: https://www.msys2.org/
+The objective is to survive for as long as possible.
 
-- otherwise, get mingw32 compiler from some other source or modify tasks settings in .vscode
+Blue walls need to be avoided by the triangle moving in the center,
+and Green walls need to be avoided by the cursor.
+
+This game is written entirely in C++, using the raylib library for
+graphics handling and some basic vector math.
+
+The primary objective of this project was to learn about some basic
+game design concepts that are taken for granted when using higher level
+game engines, like relative rotation, window scale matching, 
+and collision detection.
