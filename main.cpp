@@ -120,13 +120,8 @@ void EventLoop::game() {
   if (!paused) for (int i=0; i<50; i++) {
     // spawn new wall
     if (spawnTimer.tick() && !walls[i].spawned) {
-      walls[i].type = WallType::TriCollide;
-      walls[i].spawned = true;
-      walls[i].rotate = true;
-      walls[i].speed = 120 + lifetime * 2.0;
-      walls[i].color = BLUE;
-      walls[i].rot = lifetime + (i * PI / 3); // change position based on index
-      walls[i].pos = Vector2{ screenCenter.x, -120.0 };
+      if (wallLim % 2) walls[i].spawn(WallType::TriCollide, Vector2{ screenCenter.x, -1000.0 }, i, lifetime);
+      else walls[i].spawn(WallType::MouseCollide, Vector2{ screenCenter.x, -1000.0 }, i, lifetime);
       if (simul == 0) spawnTimer.duration -= 0.005;
       if (simul < wallLim) simul++;
       else break;
@@ -139,15 +134,20 @@ void EventLoop::game() {
     if (walls[i].shouldRemove) {
       walls[i].spawned = false;
       walls[i].shouldRemove = false;
+      walls[i].type = WallType::Unspawned;
     } else {
       walls[i].update(deltaT, screenCenter);
-      if (walls[i].spawned && walls[i].pointRadiusCollision(tri.pos, 6.0)) {
+      if (walls[i].type == WallType::TriCollide && walls[i].pointRadiusCollision(tri.pos, 6.0)) {
         if (Util::distance(screenCenter, walls[i].pos) < 45.0) {
           // if wall is behind triangle, ignore collision
           continue;
         }
         walls[i].color = RED;
-        printf("Collided with wall %i\n", i);
+        printf("Collided with wall (tri) %i\n", i);
+        paused = true;
+      } else if (walls[i].type == WallType::MouseCollide && walls[i].pointRadiusCollision(mousePos, 18.0)) {
+        walls[i].color = RED;
+        printf("Collided with wall (mouse) %i\n", i);
         paused = true;
       };
     }
@@ -229,7 +229,7 @@ int main() {
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
-  eventLoop.spawnTimer.duration = 0.8;
+  eventLoop.spawnTimer.duration = 1.2;
   eventLoop.spawnTimer.repeat = true;
   eventLoop.tri.color = primary;
   eventLoop.hex.color = primary;

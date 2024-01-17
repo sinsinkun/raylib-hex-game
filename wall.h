@@ -19,6 +19,7 @@ class Wall {
     float h = 20.0;
     float rot = 0.0;
     Color color = BLACK;
+    void spawn(WallType type, Vector2 pos, int rotPos, float lifetime);
     void update(float delta, Vector2 center);
     void draw();
     bool rayCastCollision(Vector2 point);

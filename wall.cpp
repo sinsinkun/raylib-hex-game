@@ -5,6 +5,21 @@
 #include "util.h"
 #include <cstdio>
 
+void Wall::spawn(WallType type, Vector2 pos, int rotPos, float lifetime) {
+  this->type = type;
+  this->spawned = true;
+  this->rotate = true;
+  this->pos = pos;
+  this->rot = lifetime + (rotPos * PI / 3);
+  this->speed = 120.0 + lifetime * 2.0;
+
+  if (type == WallType::TriCollide) {
+    this->color = BLUE;
+  } else if (type == WallType::MouseCollide) {
+    this->color = GREEN;
+  }
+};
+
 void Wall::draw() {
   // calculate polygon point coords
   vA = { rotPos.x - (w2/2 * cos(rot) + h/2 * sin(rot)), rotPos.y + (h/2 * cos(rot) - w2/2 * sin(rot)) };
