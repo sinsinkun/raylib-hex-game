@@ -1,17 +1,24 @@
 #include "raylib.h"
 
+enum WallType {
+  Unspawned,
+  TriCollide,
+  MouseCollide,
+};
+
 class Wall {
   public:
+    WallType type = Unspawned;
     bool spawned = false;
     bool shouldRemove = false;
     bool rotate = false;
-    Vector2 pos = { 0, 0 };
-    float speed = 50;
-    float w;
-    float w2 = (w - h) * 1.1547; // 1.1547 = 2 * tan(PI/6)
-    float h;
-    float rot;
-    Color color;
+    Vector2 pos = { 0.0, 0.0 };
+    float speed = 100.0;
+    float w = 100.0;
+    float w2 = 92.4;
+    float h = 20.0;
+    float rot = 0.0;
+    Color color = BLACK;
     void update(float delta, Vector2 center);
     void draw();
     bool rayCastCollision(Vector2 point);

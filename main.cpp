@@ -116,19 +116,19 @@ void EventLoop::game() {
   
   // spawn new walls
   int simul = 0;
+  int wallLim = (int)lifetime % 4 + 1;
   if (!paused) for (int i=0; i<50; i++) {
     // spawn new wall
     if (spawnTimer.tick() && !walls[i].spawned) {
+      walls[i].type = WallType::TriCollide;
       walls[i].spawned = true;
       walls[i].rotate = true;
-      walls[i].speed = 120;
-      walls[i].w = 100;
-      walls[i].w2 = 100;
-      walls[i].h = 20;
+      walls[i].speed = 120 + lifetime * 2.0;
       walls[i].color = BLUE;
       walls[i].rot = lifetime + (i * PI / 3); // change position based on index
-      walls[i].pos = Vector2{ screenCenter.x, -20.0 };
-      if (simul < 3) simul++;
+      walls[i].pos = Vector2{ screenCenter.x, -120.0 };
+      if (simul == 0) spawnTimer.duration -= 0.005;
+      if (simul < wallLim) simul++;
       else break;
     }
   }

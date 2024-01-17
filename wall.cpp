@@ -19,7 +19,6 @@ void Wall::draw() {
 void Wall::update(float d, Vector2 c) {
   pos.x = c.x;
   pos.y += d * speed;
-  speed += 0.1;
   if (rotate) rot += d;
   rotPos = Util::rotate2d(c, pos, rot);
   float cd = Util::distance(rotPos, c);
@@ -75,8 +74,6 @@ bool Wall::pointRadiusCollision(Vector2 p, float r) {
   // no gaps in axes found == colliding
   return true;
 }
-
-// TODO: alternative collision detection: Separating Axis Theorem
 
 void Wall::debug() {
   printf("Wall debug info: ");
