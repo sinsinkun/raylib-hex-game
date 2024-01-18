@@ -2,11 +2,12 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "util.h"
-#include "timer.h"
 #include "shapes.h"
 #include "wall.h"
 
 #define GLSL_VERSION 330
+
+const int WALL_NUM = 200;
 
 enum Scene {
   menu,
@@ -29,8 +30,8 @@ class EventLoop {
     float lifetime = 0;
     Shapes::Hexagon hex;
     Shapes::Triangle tri;
-    Wall walls[50];
-    BurstTimer spawnTimer;
+    Wall walls[WALL_NUM];
+    WallSpawnData* wallPatterns[3];
     void root(); // main event loop
     void menu();
     void game();
@@ -90,7 +91,6 @@ void EventLoop::menu() {
     scene = Scene::game;
     lifetime = 0;
     hex.angle = 0;
-    spawnTimer.reset();
     paused = PauseType::unpaused;
   }
 }
@@ -116,29 +116,16 @@ void EventLoop::game() {
     tri.update(screenCenter, mousePos);
     // calculate hex position and rotation
     hex.update(deltaT, screenCenter);
-    // spawn wall based on timer
-    spawnTimer.update(deltaT);
-  }
-  
-  // spawn new walls
-  int simul = 0;
-  int wallLim = (int)lifetime % 4 + 1;
-  if (paused == PauseType::unpaused) {
-    for (int i=0; i<50; i++) {
-      // spawn new wall
-      if (spawnTimer.tick() && !walls[i].spawned) {
-        if (wallLim % 2) walls[i].spawn(WallType::TriCollide, Vector2{ screenCenter.x, -500.0 }, i, lifetime);
-        else walls[i].spawn(WallType::MouseCollide, Vector2{ screenCenter.x, -500.0 }, i, lifetime);
-        if (simul == 0) spawnTimer.duration -= 0.005;
-        if (simul < wallLim) simul++;
-        else break;
-      }
-    }
   }
 
   // update walls
   if (paused == PauseType::unpaused) {
-    for (int i=0; i<50; i++) {
+    // update existing wall cache
+    float minDistance = 0.0;
+    for (int i=0; i<WALL_NUM; i++) {
+      if (minDistance > walls[i].pos.y) {
+        minDistance = walls[i].pos.y;
+      }
       if (!walls[i].spawned) continue;
       if (walls[i].shouldRemove) {
         walls[i].spawned = false;
@@ -161,6 +148,32 @@ void EventLoop::game() {
         };
       }
     }
+    // spawn new wall pattern when furthest wall is 400px from view edge
+    if (minDistance > -400.0) {
+      // pick pattern to spawn
+      int randNum = GetRandomValue(0, 2);
+      int size = sizeof(wallPatterns[randNum]);
+      WallSpawnData pattern[size];
+      // dereference pointer
+      for (int i=0; i<size; i++) {
+        pattern[i] = wallPatterns[randNum][i];
+      }
+      int j = 0;
+      printf("DEBUG: Spawning new pattern %i\n", randNum);
+      for (int i=0; i<WALL_NUM; i++) {
+        // exit early if pattern is done
+        if (j == size) break;
+        if (!walls[i].spawned) {
+          walls[i].spawn(
+            pattern[j].type, 
+            Vector2{ screenCenter.x, pattern[j].offset }, 
+            pattern[j].rotPos, 
+            lifetime
+          );
+          j++;
+        }
+      }
+    }
   }
 
   // add uniforms to background shader
@@ -180,7 +193,7 @@ void EventLoop::game() {
     EndShaderMode();
 
     // draw walls
-    for (int i=0; i<50; i++) {
+    for (int i=0; i<WALL_NUM; i++) {
       if (!walls[i].spawned) continue;
       walls[i].draw();
     }
@@ -219,9 +232,8 @@ void EventLoop::game() {
     }
     scene = Scene::menu;
     // reset walls
-    for (int i=0; i<50; i++) {
-      walls[i].spawned = false;
-      walls[i].shouldRemove = false;
+    for (int i=0; i<WALL_NUM; i++) {
+      walls[i].reset();
     }
   }
 }
@@ -250,11 +262,14 @@ int main() {
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
-  eventLoop.spawnTimer.duration = 1.2;
-  eventLoop.spawnTimer.repeat = true;
   eventLoop.tri.color = primary;
   eventLoop.hex.color = primary;
   eventLoop.hex.rotate = true;
+
+  // add wall patterns
+  eventLoop.wallPatterns[0] = WallPatterns::staircase;
+  eventLoop.wallPatterns[1] = WallPatterns::alternate1;
+  eventLoop.wallPatterns[2] = WallPatterns::alternate2;
   
   // --- EVENT LOOP ---
   printf("\n\n\n-- Starting Event Loop --\n");

@@ -20,6 +20,16 @@ void Wall::spawn(WallType type, Vector2 pos, int rotPos, float lifetime) {
   }
 };
 
+void Wall::reset() {
+  type = WallType::Unspawned;
+  spawned = false;
+  shouldRemove = false;
+  pos = Vector2 { 0.0, 0.0 };
+  rot = 0.0;
+  color = BLACK;
+  rotPos = Vector2 { 999999.0, 999999.0 };
+}
+
 void Wall::draw() {
   // calculate polygon point coords
   vA = { rotPos.x - (w2/2 * cos(rot) + h/2 * sin(rot)), rotPos.y + (h/2 * cos(rot) - w2/2 * sin(rot)) };
@@ -98,3 +108,90 @@ void Wall::debug() {
   printf("D: (%f, %f) ", vD.x, vD.y);
   printf("rotation: %f\n", rot);
 }
+
+// --- PATTERNS ---
+
+WallSpawnData WallPatterns::staircase[30] = {
+  WallSpawnData { TriCollide, -500.0, 0 },
+  WallSpawnData { TriCollide, -520.0, 1 },
+  WallSpawnData { TriCollide, -540.0, 2 },
+  WallSpawnData { TriCollide, -560.0, 3 },
+  WallSpawnData { TriCollide, -580.0, 4 },
+  WallSpawnData { TriCollide, -600.0, 5 },
+  WallSpawnData { TriCollide, -620.0, 0 },
+  WallSpawnData { TriCollide, -640.0, 1 },
+  WallSpawnData { TriCollide, -660.0, 2 },
+  WallSpawnData { TriCollide, -680.0, 3 },
+  WallSpawnData { TriCollide, -700.0, 4 },
+  WallSpawnData { TriCollide, -720.0, 5 },
+  WallSpawnData { TriCollide, -740.0, 0 },
+  WallSpawnData { TriCollide, -760.0, 1 },
+  WallSpawnData { TriCollide, -780.0, 2 },
+  WallSpawnData { TriCollide, -800.0, 3 },
+  WallSpawnData { TriCollide, -820.0, 4 },
+  WallSpawnData { TriCollide, -840.0, 5 },
+  WallSpawnData { TriCollide, -860.0, 0 },
+  WallSpawnData { TriCollide, -880.0, 1 },
+  WallSpawnData { TriCollide, -900.0, 2 },
+  WallSpawnData { TriCollide, -920.0, 3 },
+  WallSpawnData { TriCollide, -940.0, 4 },
+  WallSpawnData { TriCollide, -960.0, 5 },
+  WallSpawnData { TriCollide, -980.0, 0 },
+  WallSpawnData { TriCollide, -1000.0, 1 },
+  WallSpawnData { TriCollide, -1020.0, 2 },
+  WallSpawnData { TriCollide, -1040.0, 3 },
+  WallSpawnData { TriCollide, -1060.0, 4 },
+  WallSpawnData { TriCollide, -1080.0, 5 },
+};
+WallSpawnData WallPatterns::alternate1[24] = {
+  WallSpawnData { TriCollide, -500.0, 0 },
+  WallSpawnData { TriCollide, -500.0, 2 },
+  WallSpawnData { TriCollide, -500.0, 4 },
+  WallSpawnData { MouseCollide, -600.0, 1 },
+  WallSpawnData { MouseCollide, -600.0, 3 },
+  WallSpawnData { MouseCollide, -600.0, 5 },
+  WallSpawnData { TriCollide, -700.0, 0 },
+  WallSpawnData { TriCollide, -700.0, 2 },
+  WallSpawnData { TriCollide, -700.0, 4 },
+  WallSpawnData { MouseCollide, -800.0, 1 },
+  WallSpawnData { MouseCollide, -800.0, 3 },
+  WallSpawnData { MouseCollide, -800.0, 5 },
+  WallSpawnData { TriCollide, -900.0, 0 },
+  WallSpawnData { TriCollide, -900.0, 2 },
+  WallSpawnData { TriCollide, -900.0, 4 },
+  WallSpawnData { MouseCollide, -1000.0, 1 },
+  WallSpawnData { MouseCollide, -1000.0, 3 },
+  WallSpawnData { MouseCollide, -1000.0, 5 },
+  WallSpawnData { TriCollide, -1100.0, 0 },
+  WallSpawnData { TriCollide, -1100.0, 2 },
+  WallSpawnData { TriCollide, -1100.0, 4 },
+  WallSpawnData { MouseCollide, -1200.0, 1 },
+  WallSpawnData { MouseCollide, -1200.0, 3 },
+  WallSpawnData { MouseCollide, -1200.0, 5 },
+};
+WallSpawnData WallPatterns::alternate2[24] = {
+  WallSpawnData { TriCollide,   -500.0, 0 },
+  WallSpawnData { MouseCollide, -500.0, 2 },
+  WallSpawnData { TriCollide,   -500.0, 4 },
+  WallSpawnData { MouseCollide, -600.0, 1 },
+  WallSpawnData { TriCollide,   -600.0, 3 },
+  WallSpawnData { MouseCollide, -600.0, 5 },
+  WallSpawnData { TriCollide,   -800.0, 0 },
+  WallSpawnData { MouseCollide, -800.0, 2 },
+  WallSpawnData { TriCollide,   -800.0, 4 },
+  WallSpawnData { MouseCollide, -900.0, 1 },
+  WallSpawnData { TriCollide,   -900.0, 3 },
+  WallSpawnData { MouseCollide, -900.0, 5 },
+  WallSpawnData { TriCollide,   -1100.0, 0 },
+  WallSpawnData { MouseCollide, -1100.0, 2 },
+  WallSpawnData { TriCollide,   -1100.0, 4 },
+  WallSpawnData { MouseCollide, -1200.0, 1 },
+  WallSpawnData { TriCollide,   -1200.0, 3 },
+  WallSpawnData { MouseCollide, -1200.0, 5 },
+  WallSpawnData { TriCollide,   -1300.0, 0 },
+  WallSpawnData { MouseCollide, -1300.0, 2 },
+  WallSpawnData { TriCollide,   -1300.0, 4 },
+  WallSpawnData { MouseCollide, -1400.0, 1 },
+  WallSpawnData { TriCollide,   -1400.0, 3 },
+  WallSpawnData { MouseCollide, -1400.0, 5 },
+};

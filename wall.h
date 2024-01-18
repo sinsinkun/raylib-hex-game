@@ -20,6 +20,7 @@ class Wall {
     float rot = 0.0;
     Color color = BLACK;
     void spawn(WallType type, Vector2 pos, int rotPos, float lifetime);
+    void reset();
     void update(float delta, Vector2 center);
     void draw();
     bool rayCastCollision(Vector2 point);
@@ -31,4 +32,19 @@ class Wall {
     Vector2 vB = { 999999.0, 999999.0 };
     Vector2 vC = { 999999.0, 999999.0 };
     Vector2 vD = { 999999.0, 999999.0 };
+};
+
+// helper class for creating wall patterns
+class WallSpawnData {
+  public:
+    WallType type = Unspawned;
+    float offset = -100.0;
+    int rotPos = 0;
+};
+
+class WallPatterns {
+  public:
+    static WallSpawnData staircase[30];
+    static WallSpawnData alternate1[24];
+    static WallSpawnData alternate2[24];
 };
