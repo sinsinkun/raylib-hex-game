@@ -33,3 +33,13 @@ void Triangle::update(Vector2 c, Vector2 m) {
 void Triangle::draw() {
   DrawPoly(pos, 3, 10, angle * 180.0 / PI, color);
 }
+
+/* -- CURSOR METHODS -- */
+
+void Cursor::update(Vector2 p) {
+  pos = p;
+}
+
+void Cursor::draw() {
+  DrawCircle((int)pos.x, (int)pos.y, radius, color);
+}

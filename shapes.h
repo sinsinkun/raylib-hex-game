@@ -21,4 +21,13 @@ namespace Shapes {
       void update(Vector2 center, Vector2 mousePos);
       void draw();
   };
+
+  class Cursor {
+    public:
+      Vector2 pos = {0.0, 0.0};
+      float radius = 20.0;
+      Color color = BLACK;
+      void update(Vector2 mousePos);
+      void draw();
+  };
 }

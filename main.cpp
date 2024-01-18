@@ -30,6 +30,7 @@ class EventLoop {
     float lifetime = 0;
     Shapes::Hexagon hex;
     Shapes::Triangle tri;
+    Shapes::Cursor cursor;
     Wall walls[WALL_NUM];
     WallSpawnData* wallPatterns[3];
     void root(); // main event loop
@@ -106,12 +107,15 @@ void EventLoop::game() {
   Vector2 screenCenter = { (float)w/2, (float)h/2 };
 
   // hide cursor
-  if (!IsCursorHidden()) {
+  if (IsCursorHidden() && paused != PauseType::unpaused) {
+    ShowCursor();
+  } else if (!IsCursorHidden() && paused == PauseType::unpaused) {
     HideCursor();
   }
   
   if (paused == PauseType::unpaused) {
     lifetime += deltaT;
+    cursor.update(mousePos);
     // calculate triangle position and rotation
     tri.update(screenCenter, mousePos);
     // calculate hex position and rotation
@@ -180,7 +184,7 @@ void EventLoop::game() {
   SetShaderValue(shaders[0], GetShaderLocation(shaders[0], "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
   SetShaderValue(shaders[1], GetShaderLocation(shaders[1], "t"), &lifetime, SHADER_UNIFORM_FLOAT);
   SetShaderValue(shaders[1], GetShaderLocation(shaders[1], "screen_size"), &screenSize, SHADER_UNIFORM_VEC2);
-  SetShaderValue(shaders[1], GetShaderLocation(shaders[1], "mouse_pos"), &mousePos, SHADER_UNIFORM_VEC2);
+  SetShaderValue(shaders[1], GetShaderLocation(shaders[1], "mouse_pos"), &cursor.pos, SHADER_UNIFORM_VEC2);
 
   // --- DRAW TO SCREEN ---
   BeginDrawing();
@@ -203,7 +207,7 @@ void EventLoop::game() {
 
     // draw pointer
     BeginShaderMode(shaders[1]);
-      DrawCircle((int)mousePos.x, (int)mousePos.y, 20, BLACK);
+      cursor.draw();
     EndShaderMode();
 
     // draw text overlay
