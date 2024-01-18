@@ -1,6 +1,7 @@
 ## Hex Game
 
-![Screenshot](assets/screenshot.png)
+<!-- ![Screenshot](assets/screenshot.png) -->
+<img src="assets/screenshot.png" width="100" />
 
 This is a basic arcade game inspired by Super Hexagon.
 

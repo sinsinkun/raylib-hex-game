@@ -141,7 +141,7 @@ void EventLoop::game() {
           walls[i].color = RED;
           printf("Collided with wall (tri) %i\n", i);
           paused = PauseType::gameover;
-        } else if (walls[i].type == WallType::MouseCollide && walls[i].pointRadiusCollision(mousePos, 18.0)) {
+        } else if (walls[i].type == WallType::MouseCollide && walls[i].pointRadiusCollision(mousePos, 15.0)) {
           walls[i].color = MAGENTA;
           printf("Collided with wall (mouse) %i\n", i);
           paused = PauseType::gameover;
