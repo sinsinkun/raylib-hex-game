@@ -16,7 +16,7 @@ class Wall {
     float speed = 100.0;
     float w = 100.0;
     float w2 = 92.4;
-    float h = 20.0;
+    float h = 30.0;
     float rot = 0.0;
     Color color = BLACK;
     void spawn(WallType type, Vector2 pos, int rotPos, float lifetime);
@@ -45,6 +45,6 @@ class WallSpawnData {
 class WallPatterns {
   public:
     static WallSpawnData staircase[30];
-    static WallSpawnData alternate1[24];
+    static WallSpawnData alternate1[30];
     static WallSpawnData alternate2[24];
 };

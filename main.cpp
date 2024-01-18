@@ -128,9 +128,7 @@ void EventLoop::game() {
       }
       if (!walls[i].spawned) continue;
       if (walls[i].shouldRemove) {
-        walls[i].spawned = false;
-        walls[i].shouldRemove = false;
-        walls[i].type = WallType::Unspawned;
+        walls[i].reset();
       } else {
         walls[i].update(deltaT, screenCenter);
         if (walls[i].type == WallType::TriCollide && walls[i].pointRadiusCollision(tri.pos, 6.0)) {
