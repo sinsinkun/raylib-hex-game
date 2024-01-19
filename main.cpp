@@ -33,6 +33,8 @@ class EventLoop {
     Shapes::Cursor cursor;
     Wall walls[WALL_NUM];
     WallSpawnData* wallPatterns[3];
+    Sound sounds[2];
+    Music songs[1];
     void root(); // main event loop
     void menu();
     void game();
@@ -89,6 +91,8 @@ void EventLoop::menu() {
 
   // --- REGISTER INPUT ---
   if (IsKeyPressed(KEY_SPACE)) {
+    PlaySound(sounds[0]);
+    PlayMusicStream(songs[0]);
     scene = Scene::game;
     lifetime = 0;
     hex.angle = 0;
@@ -106,6 +110,9 @@ void EventLoop::game() {
   Vector2 mousePos = GetMousePosition();
   Vector2 screenCenter = { (float)w/2, (float)h/2 };
 
+  // update music buffer
+  UpdateMusicStream(songs[0]);
+
   // hide cursor
   if (IsCursorHidden() && paused != PauseType::unpaused) {
     ShowCursor();
@@ -114,6 +121,7 @@ void EventLoop::game() {
   }
   
   if (paused == PauseType::unpaused) {
+    if (!IsMusicStreamPlaying(songs[0])) PlayMusicStream(songs[0]);
     lifetime += deltaT;
     cursor.update(mousePos);
     // calculate triangle position and rotation
@@ -143,10 +151,14 @@ void EventLoop::game() {
           walls[i].color = RED;
           printf("Collided with wall (tri) %i\n", i);
           paused = PauseType::gameover;
+          PlaySound(sounds[1]);
+          StopMusicStream(songs[0]);
         } else if (walls[i].type == WallType::MouseCollide && walls[i].pointRadiusCollision(mousePos, 15.0)) {
           walls[i].color = MAGENTA;
           printf("Collided with wall (mouse) %i\n", i);
           paused = PauseType::gameover;
+          PlaySound(sounds[1]);
+          StopMusicStream(songs[0]);
         };
       }
     }
@@ -224,12 +236,15 @@ void EventLoop::game() {
 
   // --- REGISTER INPUT ---
   if (IsKeyPressed(KEY_SPACE)) {
+    PlaySound(sounds[0]);
     if (paused == PauseType::unpaused) {
       paused = PauseType::paused;
+      PauseMusicStream(songs[0]);
       return;
     }
     if (paused == PauseType::paused) {
       paused = PauseType::unpaused;
+      ResumeMusicStream(songs[0]);
       return;
     }
     scene = Scene::menu;
@@ -246,6 +261,7 @@ int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE); // Window configuration flags
   SetConfigFlags(FLAG_MSAA_4X_HINT);
   InitWindow(800, 600, "Hex 2");
+  InitAudioDevice();
   SetWindowMinSize(400, 300);
   SetTargetFPS(60);
 
@@ -257,10 +273,17 @@ int main() {
   Shader cursorShader = LoadShader(0, TextFormat("assets/cursor.frag", GLSL_VERSION));
   Color primary = GetColor(0xafaaecff);
 
+  Sound beep1 = LoadSound("assets/beep.wav");
+  Sound beep2 = LoadSound("assets/beep-2.wav");
+  Music metronome = LoadMusicStream("assets/120-bpm.mp3");
+
   // add assets to event loop
   EventLoop eventLoop;
   eventLoop.shaders[0] = bgShader;
   eventLoop.shaders[1] = cursorShader;
+  eventLoop.sounds[0] = beep1;
+  eventLoop.sounds[1] = beep2;
+  eventLoop.songs[0] = metronome;
   eventLoop.font = fontRetro;
   eventLoop.primaryColor = primary;
   eventLoop.scene = Scene::menu;
@@ -283,7 +306,14 @@ int main() {
   for (Shader s : eventLoop.shaders) {
     UnloadShader(s);
   }
+  for (Sound s : eventLoop.sounds) {
+    UnloadSound(s);
+  }
+  for (Music m : eventLoop.songs) {
+    UnloadMusicStream(m);
+  }
   UnloadFont(fontRetro);
+  CloseAudioDevice();
   CloseWindow();
 
   return 0;
