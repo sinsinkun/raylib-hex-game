@@ -33,6 +33,7 @@ class EventLoop {
     Shapes::Cursor cursor;
     Wall walls[WALL_NUM];
     WallSpawnData* wallPatterns[3];
+    int wallPatternsSize[3];
     Sound sounds[2];
     Music songs[1];
     void root(); // main event loop
@@ -163,17 +164,17 @@ void EventLoop::game() {
       }
     }
     // spawn new wall pattern when furthest wall is 400px from view edge
-    if (minDistance > -400.0) {
+    if (minDistance > -300.0) {
       // pick pattern to spawn
       int randNum = GetRandomValue(0, 2);
-      int size = sizeof(wallPatterns[randNum]);
+      int size = wallPatternsSize[randNum];
       WallSpawnData pattern[size];
       // dereference pointer
       for (int i=0; i<size; i++) {
         pattern[i] = wallPatterns[randNum][i];
       }
       int j = 0;
-      printf("DEBUG: Spawning new pattern %i\n", randNum);
+      printf("DEBUG: Spawning new pattern %i (%i)\n", randNum, size);
       for (int i=0; i<WALL_NUM; i++) {
         // exit early if pattern is done
         if (j == size) break;
@@ -208,8 +209,7 @@ void EventLoop::game() {
 
     // draw walls
     for (int i=0; i<WALL_NUM; i++) {
-      if (!walls[i].spawned) continue;
-      walls[i].draw();
+      if (walls[i].spawned) walls[i].draw();
     }
 
     // draw hex
@@ -293,8 +293,11 @@ int main() {
 
   // add wall patterns
   eventLoop.wallPatterns[0] = WallPatterns::staircase;
+  eventLoop.wallPatternsSize[0] = 30;
   eventLoop.wallPatterns[1] = WallPatterns::alternate1;
+  eventLoop.wallPatternsSize[1] = 30;
   eventLoop.wallPatterns[2] = WallPatterns::alternate2;
+  eventLoop.wallPatternsSize[2] = 24;
   
   // --- EVENT LOOP ---
   printf("\n\n\n-- Starting Event Loop --\n");
